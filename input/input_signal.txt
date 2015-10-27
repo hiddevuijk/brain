@@ -1,0 +1,16 @@
+area=
+1
+type=(0=whitenoise,1=block,2=sine)
+0
+tstart=
+0
+tend=
+1000
+period=
+20.
+phase=
+0.0
+amplitude=
+100.
+offset=
+100.

@@ -1,0 +1,25 @@
+atol=
+1.0e-12
+
+rtol =
+1.0e-12
+
+h1 =
+0.01
+
+hmin =
+0.0
+
+t1 =
+0.0
+
+t2 =
+2500.0
+
+dt =
+1.
+
+routine =(options:dopr5=1,dopr853=2,bs=3,stoerm=4)
+1
+
+
