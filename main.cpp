@@ -29,41 +29,53 @@
 #include "headers/write_matrix.h"
 #include "headers/pcc.h"
 #include "headers/coherence.h"
+#include "headers/corr2.h"
 
 using namespace::std;
 
 int main()
 {
 
-	Int nareas =29;
-	Doub mu_ee, mu_ie, eta,
+	Int nareas =29;				// number of brain areas
+	Doub mu_ee, mu_ie, eta,		// paremeters of the network
 		 tau_e, tau_i, beta_e, beta_i,
 		 w_ee, w_ei, w_ie, w_ii,
 		 noise;
 
-	Doub atol, rtol, h1, hmin, t1, t2;
-	Int npoints;
-	Int routine;
+	Doub atol, rtol, h1, hmin, t1, t2; 		// integration parameters
+	Int npoints;		// number of time points
+	Int routine;		// Which integratoin routine is used: 
 	double dt;
-	Int seed;
-	
-	SN = 256;		// number of points in Welch segments for coherence
 
-	IS insig  = read_input_signal("input/input_signal.txt");
+	Int seed;			// seed for random generator
+	Ran r(seed);		// initialize NR3 random generator
+
+	// number of points in Welch segments for coherence
+	// only multiples of SN points are used
+	int SN = 256;		
+
+	// read info of inputsignal in insig
+	IS insig  = read_input_signal("input/input_signal.txt"); 
+
+	// read network variables
 	read_NN_variables(mu_ee,mu_ie,eta,tau_e,tau_i,beta_e,beta_i,w_ee,w_ei,w_ie,w_ii,noise,seed,"input/NN_variables.txt");
-	read_integration_variables(atol,rtol,h1,hmin,t1,t2, dt,routine,"input/integration_variables.txt");
-	Ran r(seed);
 
-	
+	// read integration variables
+	read_integration_variables(atol,rtol,h1,hmin,t1,t2, dt,routine,"input/integration_variables.txt");
+
+	// determine number of time steps
 	int t_steps;
 	if(fmod((t2-t1)/dt,1)==0){
 		t_steps = (t2-t1)/dt + 1;
 	} else {
 		t_steps = (t2-t1)/dt + 2;
 	}
+
 	int t_steps2 = pow2(t_steps);				// smalles number larger than 2*t_steps that is a power of 2
 	insig.t_end=t_steps2;
 	t2 = t_steps2;
+
+
 	MatDoub FLN(nareas,nareas,0.0);								// matrix containing the FLN values. (a measure of the connection strength)
 	VecDoub etah(nareas,1.0);									// a vector containing the values: 1+eta*hi
 	VecDoub v_start(2*nareas,0.0);								// starting values of the firing rates, this is updated with an Odeint routine
@@ -72,22 +84,25 @@ int main()
 	vector<VecDoub> acorr(2*nareas,VecDoub(2*t_steps2,0.0));	// a matrix containing the auto correlatoins of the firing rates of each area
 	vector<VecDoub> corr_V1(2*nareas,VecDoub(2*t_steps2,0.0));	// matrix with correlatoins with area V1, length is 2*t_step2 for zero padding in correl(see NR)
 	vector<VecDoub> corr_in(2*nareas,VecDoub(2*t_steps2,0.0));	// matrix with correlations with input vector
-	vector<VecDoub> coh_in(2*nareas,VecDoub(t_steps2,0.0));		// matrix with coherence w.r.t inputsignal
-	vector<VecDoub> coh_V1(2*nareas,VecDoub(t_steps2,0.0));		// matrix with coherence w.r.t. area V1
+
+	VecDoub empty_vector;										// An empty NR3 vector used for initialization of some matrices
+	vector<VecDoub> coh_in(2*nareas,empty_vector);				// matrix with coherence w.r.t inputsignal, initialized with an empty NR3 vector
+	vector<VecDoub> coh_V1(2*nareas,empty_vector);				// matrix with coherence w.r.t. area V1, initialized with an empty NR3 vector
 
 	VecDoub noise_vec (2*nareas,0.0);							// noise input, this is updates each integration step
 	VecDoub input_vec(t_steps2,0.0);							// if input signal is white noise, values are stored in input_noise
 	VecDoub corr_coeff_v1(2*nareas,0.0);						// vector with the pearson correlation coefficient of each area with v1
 
 
+	// input hierarchy (linear estimation)
+	for(int i=0;i<etah.size();i++){
+		etah[i] += eta*(1 - (nareas -1 - i)/(nareas-1.));
+	}
 
-//	for(int i=0;i<etah.size();i++){
-//		etah[i] += eta*(1 - (nareas -1 - i)/(nareas-1.));
-//	}
-
+	// copy the starting values in frates[i][0]
 	for(int i=0;i<v_start.size();i++) frates[i][0] = v_start[i];	
 
-	// save the t values, and input_signal
+	// save the t values (saved in xvalues.csv)
 	ofstream x_points("xvalues.csv");
 	double tt = t1;
 	while(tt<=t2){
@@ -95,15 +110,15 @@ int main()
 		tt += dt;
 	}	
 
-	read_FLN(FLN,"FLN.csv");					// read the FLN values from the FLN.csv file
+	read_FLN(FLN,"FLN.csv");	// read the FLN values from the FLN.csv file
 
-	Output NNout;	// the object handeling the output of the Odeint routines
+	Output NNout;				// the object handeling the output of the Odeint routines
 
 
 	// each iteration of the loop the time is advanced from t to t+dt
 	// and noise is added after saving the rates in frates
-	double t = t1; // current time, each iteration it get incremented by dt
-	int ti=1;		// time index location for frates matrix
+	double t = t1;		// current time, each iteration it get incremented by dt
+	int ti=1;			// time index location for frates matrix
 
 	while(t<t2) {
 
@@ -123,7 +138,6 @@ int main()
 				input_vec[ti] = insig.offset+insig.A*sin(t*2*acos(-1)/insig.T - insig.phi);
 			}
 		}
-
 
 		// brain is the object(def in derivatives) containing the information of the differential equations
 		NN brain(FLN,etah, mu_ee,mu_ie,eta,tau_e,tau_i,beta_e,beta_i,w_ee,w_ei,w_ie,w_ii,insig,noise_vec);
@@ -152,40 +166,54 @@ int main()
 
 		
 		for(int i=0;i<v_start.size();i++) frates[i][ti] = v_start[i];		// copy updated v_start in frates
-
 		t += dt;	// increment start time of integration
 		ti += 1;	// increment ti
 	}
 
+
+
+	// copy (frates[V1e]-mean)/std in a vector with zero padding (these are used in correl)
+	// same for frates[V1i] and input_vec
 	VecDoub temp_V1e(2*t_steps2,0.0);
 	VecDoub temp_V1i(2*t_steps2,0.0);
 	VecDoub temp_in(2*t_steps2,0.0);
+	double mV1e = mean(frates[0],frates[0].size());
+	double mV1i = mean(frates[nareas],frates[nareas].size());
+	double min = mean(input_vec,input_vec.size());
+	double sV1e = stdev(frates[0],frates[0].size());
+	double sV1i = stdev(frates[nareas],frates[nareas].size());
+	double sin = stdev(input_vec,input_vec.size());
+
 	for(int i=0;i<t_steps2;i++) {
-		temp_V1e[i] = frates[0][i];
-		temp_V1i[i] = frates[nareas][i];
-		temp_in[i] = input_vec[i];
+		temp_V1e[i] = (frates[0][i]-mV1e)/sV1e;
+		temp_V1i[i] = (frates[nareas][i]-mV1i)/sV1e;
+		temp_in[i] = (input_vec[i]-min)/sin;
 	}
 
+	// calculate the coherence and correlations
 	for(int a=0;a<2*nareas;a++){
+		// copy (frates[a]-mean)/std in a vector temp, with zero padding
 		VecDoub temp(2*t_steps2,0.0);
-		for(int i=0;i<t_steps2;i++) temp[i] = frates[a][i];
+		double ma = mean(frates[a],frates[a].size());
+		double sa = stdev(frates[a],frates[a].size());
+		for(int i=0;i<t_steps2;i++) temp[i] = (frates[a][i]-ma)/sa;
 
 		correl(temp,temp,acorr[a]);
 		correl(temp,temp_in,corr_in[a]);
-
+		
 		if(a<nareas) correl(temp_V1e,temp,corr_V1[a]);
 		if(a>=nareas) correl(temp_V1i,temp,corr_V1[a]);
 
 		coh_in[a] = coherence(frates[a],input_vec,frates[a].size(),SN);
+
 		if(a<nareas) coh_V1[a] = coherence(frates[a],frates[0],frates[0].size(),SN);	
-		if(a>=nareas) coh_V1[nareas] = coherence(frates[a],frates[nareas],frates[nareas].size(),SN);
+		if(a>=nareas) coh_V1[a] = coherence(frates[a],frates[nareas],frates[nareas].size(),SN);
 	}
-
 	
-
+	// calculate Pearson Correlation Coefficient
 	pcc_v1(frates,corr_coeff_v1);
 
-	// save frates and auto_corr
+	// save results
 	ofstream rates_out("firing_rates.csv");
 	rates_out << setprecision(16);
 	write_matrix(frates,t_steps2,2*nareas,rates_out);
@@ -206,9 +234,10 @@ int main()
 	corr_in_out << setprecision(16);
 	write_matrix(corr_in,t_steps2,2*nareas,corr_in_out);
 
+
 	ofstream coh_V1_out("coh_V1.csv");
 	coh_V1_out << setprecision(16);
-	write_matrix(coh_V1,t_steps2,2*nareas,coh_V1_out);
+	write_matrix(coh_V1,coh_V1[0].size(),2*nareas,coh_V1_out);
 
 	ofstream coh_in_out("coh_in.csv");
 	coh_in_out << setprecision(16);

@@ -5,9 +5,14 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 
 names=["V1","V2","V4","DP","MT","8m","5","8l","TEO","2","F1","STPc","7A","46d","10","9/46v","9/46d","F5","TEpd","PBr","7m","7B","F2","STPi","ProM","F7","8B","STPr","24c"]
-
+fr = np.genfromtxt("firing_rates.csv",delimiter=';')
 results = np.genfromtxt("coh_V1.csv",delimiter=';')
 xvalues = np.genfromtxt("xvalues.csv")
+
+#results = []
+#for i in range(len(fr)):
+#	r ,f = plt.cohere(fr[0],fr[i],NFFT=256,Fs=1)
+#	results.append(r)
 
 pdf_pages = PdfPages('coh_V1.pdf')
 fig = plt.figure(figsize=(8.27,11.69),dpi=100)

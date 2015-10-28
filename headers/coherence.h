@@ -50,7 +50,7 @@ V coherence(const V& x, const V& y, int N, int SN, double (*filter)(int,int)=coh
 	V Syy(SN,0.0);
 	V Sxy(SN,0.0);
 
-	for(int i=0i;i*SN<N;i++) {
+	for(int i=0i;i*SN<(N-SN);i++) {
 		VecDoub xtemp(SN,0.0);
 		VecDoub ytemp(SN,0.0);
 	

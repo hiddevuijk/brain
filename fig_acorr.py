@@ -2,14 +2,15 @@ import numpy as np
 import matplotlib.ticker as ticker
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-
+import sys
 
 names=["V1","V2","V4","DP","MT","8m","5","8l","TEO","2","F1","STPc","7A","46d","10","9/46v","9/46d","F5","TEpd","PBr","7m","7B","F2","STPi","ProM","F7","8B","STPr","24c"]
 
 results = np.genfromtxt("acorr.csv",delimiter=';')
 xvalues = np.genfromtxt("xvalues.csv")
-
+#xvalues = range(2500)
 name_pos = (-1,0.4)
+
 
 pdf_pages = PdfPages('auto_corr.pdf')
 fig = plt.figure(figsize=(8.27,11.69),dpi=100)
