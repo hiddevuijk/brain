@@ -182,7 +182,7 @@ int main()
 
 	for(int i=0;i<t_steps2;i++) {
 		temp_V1e[i] = (frates[0][i]-mV1e)/sV1e;
-		temp_V1i[i] = (frates[nareas][i]-mV1i)/sV1e;
+		temp_V1i[i] = (frates[nareas][i]-mV1i)/sV1i;
 		temp_in[i] = (input_vec[i]-min)/sin;
 	}
 
@@ -204,9 +204,6 @@ int main()
 		if(a>=nareas) correl(temp_V1i,temp,corr_V1[a]);
 		devide_by(corr_V1[a],corr_V1[a].size(),0.5*corr_V1[a].size());
 
-		if(a<nareas) cout << "e\t" << a << endl;
-		if(a>=nareas) cout << "i\t" << a << endl;
-	
 		coh_in[a] = coherence(frates[a],input_vec,frates[a].size(),SN);
 
 		if(a<nareas) coh_V1[a] = coherence(frates[a],frates[0],frates[0].size(),SN);	

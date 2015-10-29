@@ -11,9 +11,6 @@ xvalues = np.genfromtxt("xvalues.csv")
 
 
 
-
-
-
 pdf_pages = PdfPages('corr_V1.pdf')
 fig = plt.figure(figsize=(8.27,11.69),dpi=100)
 l=-1
