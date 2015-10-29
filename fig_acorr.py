@@ -8,9 +8,7 @@ names=["V1","V2","V4","DP","MT","8m","5","8l","TEO","2","F1","STPc","7A","46d","
 
 results = np.genfromtxt("acorr.csv",delimiter=';')
 xvalues = np.genfromtxt("xvalues.csv")
-#xvalues = range(2500)
 name_pos = (-1,0.4)
-
 
 pdf_pages = PdfPages('auto_corr.pdf')
 fig = plt.figure(figsize=(8.27,11.69),dpi=100)
@@ -22,20 +20,17 @@ for i in range(maxpp):
 	plt.subplot(maxpp,2,l)
 	if i ==0:
 		plt.title("Excitatory")
-	result = results[i][:len(results[i])/2]
-#	result /= max(result)	
+	result = results[i]	
 	plt.plot(result)
 	plt.yticks([0,max(result)],[0,r'$%g$' % max(result)])
 	plt.ylabel(names[i] ,rotation='horizontal',position=name_pos)
 	plt.xticks([len(xvalues)],[r'$%g$' % xvalues[-1]])
-
 	r += 2
 	i2 = i + len(results)/2
 	plt.subplot(maxpp,2,r)
 	if i==0:
 		plt.title("Inhibitory")
-	result = results[i2][:len(results[i2])/2]
-#	result /= max(result)
+	result = results[i2]
 	plt.plot(result)
 	plt.yticks([0,max(result)],[0,r'$%g$' % max(result)])
 	plt.xticks([len(xvalues)],[r'$%g$' % xvalues[-1]])
@@ -49,8 +44,7 @@ r=0
 for i in range(maxpp,len(results)/2):
 	l +=2
 	plt.subplot(maxpp,2,l)
-	result = results[i][:len(results[i])/2]
-#	result /= max(result)
+	result = results[i]
 	plt.plot(result)
 	plt.yticks([0,max(result)],[0,r'$%g$' % max(result)])
 	plt.ylabel(names[i] ,rotation='horizontal',position=name_pos)
@@ -59,8 +53,7 @@ for i in range(maxpp,len(results)/2):
 	r += 2
 	i2 = i + len(results)/2
 	plt.subplot(maxpp,2,r)
-	result = results[i2][:len(results[i2])/2]
-#	result /= max(result)
+	result = results[i2]
 	plt.plot(result)
 	plt.yticks([0,max(result)],[0,r'$%g$' % max(result)])
 	plt.xticks([len(xvalues)],[r'$%g$' % xvalues[-1]])

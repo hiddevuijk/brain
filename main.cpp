@@ -109,7 +109,6 @@ int main()
 		x_points << tt << '\n';
 		tt += dt;
 	}	
-
 	read_FLN(FLN,"FLN.csv");	// read the FLN values from the FLN.csv file
 
 	Output NNout;				// the object handeling the output of the Odeint routines
@@ -209,9 +208,15 @@ int main()
 		if(a<nareas) coh_V1[a] = coherence(frates[a],frates[0],frates[0].size(),SN);	
 		if(a>=nareas) coh_V1[a] = coherence(frates[a],frates[nareas],frates[nareas].size(),SN);
 	}
-	
+
 	// calculate Pearson Correlation Coefficients
 	pcc_v1(frates,corr_coeff_v1);
+
+
+	// caculate frequencies
+	VecDoub freq(SN/2,0.0);
+	for(int i=0;i<SN/2;i++) freq[i] = i/(SN*dt); 
+
 
 	// save results
 	ofstream rates_out("firing_rates.csv");
@@ -228,12 +233,11 @@ int main()
 
 	ofstream corr_V1_out("corr_V1.csv");
 	corr_V1_out << setprecision(16);
-	write_matrix(corr_V1,t_steps2,2*nareas,corr_V1_out);
+	write_matrix(corr_V1,2*t_steps2,2*nareas,corr_V1_out);
 
 	ofstream corr_in_out("corr_in.csv");
 	corr_in_out << setprecision(16);
-	write_matrix(corr_in,t_steps2,2*nareas,corr_in_out);
-
+	write_matrix(corr_in,2*t_steps2,2*nareas,corr_in_out);
 
 	ofstream coh_V1_out("coh_V1.csv");
 	coh_V1_out << setprecision(16);
@@ -242,6 +246,10 @@ int main()
 	ofstream coh_in_out("coh_in.csv");
 	coh_in_out << setprecision(16);
 	write_matrix(coh_in,t_steps2,2*nareas,coh_in_out);
+
+	ofstream f_out("f.csv");
+	f_out << setprecision(16);
+	write_matrix(freq,freq.size(),f_out);
 
 	return 0;
 }

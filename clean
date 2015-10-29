@@ -8,5 +8,5 @@ rm corr_V1.csv
 rm xvalues.csv
 rm pcc.csv
 rm firing_rates.csv
-
+rm f.csv
 
