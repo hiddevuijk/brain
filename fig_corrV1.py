@@ -9,6 +9,11 @@ names=["V1","V2","V4","DP","MT","8m","5","8l","TEO","2","F1","STPc","7A","46d","
 results = np.genfromtxt("corr_V1.csv",delimiter=';')
 xvalues = np.genfromtxt("xvalues.csv")
 
+
+
+
+
+
 pdf_pages = PdfPages('corr_V1.pdf')
 fig = plt.figure(figsize=(8.27,11.69),dpi=100)
 l=-1

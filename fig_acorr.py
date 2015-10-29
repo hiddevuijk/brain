@@ -23,7 +23,7 @@ for i in range(maxpp):
 	if i ==0:
 		plt.title("Excitatory")
 	result = results[i][:len(results[i])/2]
-	result /= max(result)	
+#	result /= max(result)	
 	plt.plot(result)
 	plt.yticks([0,max(result)],[0,r'$%g$' % max(result)])
 	plt.ylabel(names[i] ,rotation='horizontal',position=name_pos)
@@ -35,7 +35,7 @@ for i in range(maxpp):
 	if i==0:
 		plt.title("Inhibitory")
 	result = results[i2][:len(results[i2])/2]
-	result /= max(result)
+#	result /= max(result)
 	plt.plot(result)
 	plt.yticks([0,max(result)],[0,r'$%g$' % max(result)])
 	plt.xticks([len(xvalues)],[r'$%g$' % xvalues[-1]])
@@ -50,7 +50,7 @@ for i in range(maxpp,len(results)/2):
 	l +=2
 	plt.subplot(maxpp,2,l)
 	result = results[i][:len(results[i])/2]
-	result /= max(result)
+#	result /= max(result)
 	plt.plot(result)
 	plt.yticks([0,max(result)],[0,r'$%g$' % max(result)])
 	plt.ylabel(names[i] ,rotation='horizontal',position=name_pos)
@@ -60,7 +60,7 @@ for i in range(maxpp,len(results)/2):
 	i2 = i + len(results)/2
 	plt.subplot(maxpp,2,r)
 	result = results[i2][:len(results[i2])/2]
-	result /= max(result)
+#	result /= max(result)
 	plt.plot(result)
 	plt.yticks([0,max(result)],[0,r'$%g$' % max(result)])
 	plt.xticks([len(xvalues)],[r'$%g$' % xvalues[-1]])

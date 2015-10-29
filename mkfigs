@@ -1,0 +1,10 @@
+#!/bin/bash
+
+python fig_coh_V1.py 
+python fig_coh_in.py
+python fig_corrV1.py
+python fig_corr_in.py
+python fig_acorr.py
+python fig_rates.py
+
+

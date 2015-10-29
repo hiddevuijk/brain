@@ -29,6 +29,7 @@
 #include "headers/write_matrix.h"
 #include "headers/pcc.h"
 #include "headers/coherence.h"
+#include "headers/vec_manip.h"
 #include "headers/corr2.h"
 
 using namespace::std;
@@ -95,13 +96,12 @@ int main()
 
 
 	// input hierarchy (linear estimation)
-	for(int i=0;i<etah.size();i++){
-		etah[i] += eta*(1 - (nareas -1 - i)/(nareas-1.));
-	}
+//	for(int i=0;i<etah.size();i++){
+//		etah[i] += eta*(1 - (nareas -1 - i)/(nareas-1.));
+//	}
 
 	// copy the starting values in frates[i][0]
 	for(int i=0;i<v_start.size();i++) frates[i][0] = v_start[i];	
-
 	// save the t values (saved in xvalues.csv)
 	ofstream x_points("xvalues.csv");
 	double tt = t1;
@@ -119,8 +119,7 @@ int main()
 	// and noise is added after saving the rates in frates
 	double t = t1;		// current time, each iteration it get incremented by dt
 	int ti=1;			// time index location for frates matrix
-
-	while(t<t2) {
+	while(t<(t2-1)) {
 
 		//update noise_vec
 		for( int i=0;i<noise_vec.size();i++) noise_vec[i] = bm_transform(r)*noise;
@@ -163,13 +162,10 @@ int main()
 			Odeint<StepperStoerm<NN> > ode(v_start,t,dt+t,atol,rtol,h1,hmin,NNout,brain);
 			ode.integrate();
 		}
-
-		
 		for(int i=0;i<v_start.size();i++) frates[i][ti] = v_start[i];		// copy updated v_start in frates
 		t += dt;	// increment start time of integration
 		ti += 1;	// increment ti
 	}
-
 
 
 	// copy (frates[V1e]-mean)/std in a vector with zero padding (these are used in correl)
@@ -200,17 +196,24 @@ int main()
 
 		correl(temp,temp,acorr[a]);
 		correl(temp,temp_in,corr_in[a]);
-		
+		devide_by(acorr[a],acorr[a].size(),0.5*acorr[a].size());
+		devide_by(corr_in[a],corr_in[a].size(),0.5*corr_in[a].size());
+			
+	
 		if(a<nareas) correl(temp_V1e,temp,corr_V1[a]);
 		if(a>=nareas) correl(temp_V1i,temp,corr_V1[a]);
+		devide_by(corr_V1[a],corr_V1[a].size(),0.5*corr_V1[a].size());
 
+		if(a<nareas) cout << "e\t" << a << endl;
+		if(a>=nareas) cout << "i\t" << a << endl;
+	
 		coh_in[a] = coherence(frates[a],input_vec,frates[a].size(),SN);
 
 		if(a<nareas) coh_V1[a] = coherence(frates[a],frates[0],frates[0].size(),SN);	
 		if(a>=nareas) coh_V1[a] = coherence(frates[a],frates[nareas],frates[nareas].size(),SN);
 	}
 	
-	// calculate Pearson Correlation Coefficient
+	// calculate Pearson Correlation Coefficients
 	pcc_v1(frates,corr_coeff_v1);
 
 	// save results
@@ -238,11 +241,10 @@ int main()
 	ofstream coh_V1_out("coh_V1.csv");
 	coh_V1_out << setprecision(16);
 	write_matrix(coh_V1,coh_V1[0].size(),2*nareas,coh_V1_out);
-
+	
 	ofstream coh_in_out("coh_in.csv");
 	coh_in_out << setprecision(16);
 	write_matrix(coh_in,t_steps2,2*nareas,coh_in_out);
-
 
 	return 0;
 }
