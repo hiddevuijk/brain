@@ -86,9 +86,9 @@ int main()
 	vector<VecDoub> corr_V1(2*nareas,VecDoub(2*t_steps2,0.0));	// matrix with correlatoins with area V1, length is 2*t_step2 for zero padding in correl(see NR)
 	vector<VecDoub> corr_in(2*nareas,VecDoub(2*t_steps2,0.0));	// matrix with correlations with input vector
 
-	VecDoub empty_vector;										// An empty NR3 vector used for initialization of some matrices
-	vector<VecDoub> coh_in(2*nareas,empty_vector);				// matrix with coherence w.r.t inputsignal, initialized with an empty NR3 vector
-	vector<VecDoub> coh_V1(2*nareas,empty_vector);				// matrix with coherence w.r.t. area V1, initialized with an empty NR3 vector
+	VecDoub empty_VecDoub;										// An empty NR3 vector used for initialization of some matrices
+	vector<VecDoub> coh_in(2*nareas,empty_VecDoub);				// matrix with coherence w.r.t inputsignal, initialized with an empty NR3 vector
+	vector<VecDoub> coh_V1(2*nareas,empty_VecDoub);				// matrix with coherence w.r.t. area V1, initialized with an empty NR3 vector
 
 	VecDoub noise_vec (2*nareas,0.0);							// noise input, this is updates each integration step
 	VecDoub input_vec(t_steps2,0.0);							// if input signal is white noise, values are stored in input_noise
@@ -96,9 +96,9 @@ int main()
 
 
 	// input hierarchy (linear estimation)
-//	for(int i=0;i<etah.size();i++){
-//		etah[i] += eta*(1 - (nareas -1 - i)/(nareas-1.));
-//	}
+	for(int i=0;i<etah.size();i++){
+		etah[i] += eta*(1 - (nareas -1 - i)/(nareas-1.));
+	}
 
 	// copy the starting values in frates[i][0]
 	for(int i=0;i<v_start.size();i++) frates[i][0] = v_start[i];	
@@ -112,7 +112,6 @@ int main()
 	read_FLN(FLN,"FLN.csv");	// read the FLN values from the FLN.csv file
 
 	Output NNout;				// the object handeling the output of the Odeint routines
-
 
 	// each iteration of the loop the time is advanced from t to t+dt
 	// and noise is added after saving the rates in frates
@@ -204,7 +203,6 @@ int main()
 		devide_by(corr_V1[a],corr_V1[a].size(),0.5*corr_V1[a].size());
 
 		coh_in[a] = coherence(frates[a],input_vec,frates[a].size(),SN);
-
 		if(a<nareas) coh_V1[a] = coherence(frates[a],frates[0],frates[0].size(),SN);	
 		if(a>=nareas) coh_V1[a] = coherence(frates[a],frates[nareas],frates[nareas].size(),SN);
 	}
@@ -215,7 +213,8 @@ int main()
 
 	// caculate frequencies
 	VecDoub freq(SN/2,0.0);
-	for(int i=0;i<SN/2;i++) freq[i] = i/(SN*dt); 
+	// dt is in ms so a factor 1000 to get Hz
+	for(int i=0;i<SN/2;i++) freq[i] = 1000*i/(SN*dt); 
 
 
 	// save results
@@ -245,7 +244,7 @@ int main()
 	
 	ofstream coh_in_out("coh_in.csv");
 	coh_in_out << setprecision(16);
-	write_matrix(coh_in,t_steps2,2*nareas,coh_in_out);
+	write_matrix(coh_in,coh_in[0].size(),2*nareas,coh_in_out);
 
 	ofstream f_out("f.csv");
 	f_out << setprecision(16);
