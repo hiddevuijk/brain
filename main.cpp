@@ -96,9 +96,9 @@ int main()
 
 
 	// input hierarchy (linear estimation)
-//	for(int i=0;i<etah.size();i++){
-//		etah[i] += eta*(1 - (nareas -1 - i)/(nareas-1.));
-//	}
+	for(int i=0;i<etah.size();i++){
+		etah[i] += eta*(1 - (nareas -1 - i)/(nareas-1.));
+	}
 
 	// copy the starting values in frates[i][0]
 	for(int i=0;i<v_start.size();i++) frates[i][0] = v_start[i];	
@@ -112,7 +112,6 @@ int main()
 	read_FLN(FLN,"FLN.csv");	// read the FLN values from the FLN.csv file
 
 	Output NNout;				// the object handeling the output of the Odeint routines
-
 
 	// each iteration of the loop the time is advanced from t to t+dt
 	// and noise is added after saving the rates in frates
@@ -214,7 +213,8 @@ int main()
 
 	// caculate frequencies
 	VecDoub freq(SN/2,0.0);
-	for(int i=0;i<SN/2;i++) freq[i] = i/(SN*dt); 
+	// dt is in ms so a factor 1000 to get Hz
+	for(int i=0;i<SN/2;i++) freq[i] = 1000*i/(SN*dt); 
 
 
 	// save results
