@@ -58,7 +58,7 @@ for i in range(maxpp,len(results)/2):
 	result = np.concatenate([results[i2][size/2:],results[i2][:size/2]])
 	plt.plot(result)
 	plt.yticks([0,max(results[i2])],[0,r'$%3.1e$' % max(results[i2])])
-	plt.xticks([0,size/2,size],[-1*size/2,0,size])
+	plt.xticks([0,size/2,size],[-1*size/2,0,size/2])
 
 plt.subplots_adjust(wspace=0.5,hspace=0.6,left=0.15,right=0.95,top=0.95,bottom=0.05)	
 pdf_pages.savefig(fig)
