@@ -90,12 +90,16 @@ int main()
 	VecDoub etah(nareas,1.0);
 	VecDoub v_start(2*nareas,0.0);
 
+	ifstream h_in("ha.csv");
+	for(int i=0;i<etah.size();i++) h_in >> etah[i];
+	for(int i=0;i<etah.size();i++) etah[i] =1+eta*etah[i]/etah[nareas-1];
+
 	// frates: matrix with firing rates
 	vector<VecDoub> frates(2*nareas,VecDoub(t_steps2,0.0));
 
 	// acorr: a matrix containing the auto correlatoins of the firing rates of each area
-	//corr_V1:  matrix with correlatoins with area V1, length is 2*t_step2 for zero padding in correl(see NR)
-	//corr_in:  matrix with correlations with input vector
+	// corr_V1:  matrix with correlatoins with area V1, length is 2*t_step2 for zero padding in correl(see NR)
+	// corr_in:  matrix with correlations with input vector
 	// corr_coeff_v1: vector with the pearson correlation coefficient of each area with v1
 	vector<VecDoub> acorr(2*nareas,VecDoub(2*t_steps2,0.0));
 	vector<VecDoub> corr_V1(2*nareas,VecDoub(2*t_steps2,0.0));
@@ -115,10 +119,10 @@ int main()
 	VecDoub input_vec(t_steps2,0.0);
 
 
-	// input hierarchy (linear estimation)
-	for(int i=0;i<etah.size();i++){
-		etah[i] += eta*(1 - (nareas -1 - i)/(nareas-1.));
-	}
+//	// input hierarchy (linear estimation)
+//	for(int i=0;i<etah.size();i++){
+//		etah[i] += eta*(1 - (nareas -1 - i)/(nareas-1.));
+//	}
 
 	// copy the starting values in frates[i][0]
 	for(int i=0;i<v_start.size();i++) frates[i][0] = v_start[i];	
