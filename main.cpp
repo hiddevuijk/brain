@@ -123,11 +123,6 @@ int main()
 	VecDoub input_vec(t_steps2,0.0);
 
 
-//	// input hierarchy (linear estimation)
-//	for(int i=0;i<etah.size();i++){
-//		etah[i] += eta*(1 - (nareas -1 - i)/(nareas-1.));
-//	}
-
 	// copy the starting values in frates[i][0]
 	for(int i=0;i<v_start.size();i++) frates[i][0] = v_start[i];	
 	// save the t values (saved in xvalues.csv)
