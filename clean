@@ -5,6 +5,7 @@ rm coh_v1.csv
 rm coh_in.csv
 rm corr_in.csv
 rm corr_V1.csv
+rm acorr.csv
 rm xvalues.csv
 rm pcc.csv
 rm firing_rates.csv
