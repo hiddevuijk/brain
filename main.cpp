@@ -91,8 +91,12 @@ int main()
 	VecDoub v_start(2*nareas,0.0);
 
 	ifstream h_in("ha.csv");
-	for(int i=0;i<etah.size();i++) h_in >> etah[i];
-	for(int i=0;i<etah.size();i++) etah[i] =1+eta*etah[i]/etah[nareas-1];
+	double hmax = 0.0;
+	for(int i=0;i<etah.size();i++) {
+		h_in >> etah[i];
+		if(etah[i] > hmax) hmax = etah[i];
+	}
+	for(int i=0;i<etah.size();i++) etah[i] =1+eta*etah[i]/hmax;
 
 	// frates: matrix with firing rates
 	vector<VecDoub> frates(2*nareas,VecDoub(t_steps2,0.0));
