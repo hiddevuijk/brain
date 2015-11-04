@@ -24,13 +24,10 @@
 #include "headers/input_signal.h"
 #include "headers/derivatives.h"
 #include "headers/read_variables.h"
-#include "headers/randomvec.h"
-#include "headers/corr.h"
 #include "headers/write_matrix.h"
 #include "headers/pcc.h"
 #include "headers/coherence.h"
 #include "headers/vec_manip.h"
-#include "headers/corr2.h"
 
 using namespace::std;
 
@@ -81,7 +78,6 @@ int main()
 	int t_steps2 = pow2(t_steps);
 	insig.t_end=t_steps2;
 	t2 = t_steps2;
-
 
 	// FLN: matrix containing the FLN values. (a measure of the connection strength)
 	// etah:  a vector containing the values: 1+eta*hi
