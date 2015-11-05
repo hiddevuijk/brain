@@ -30,7 +30,6 @@
 #include "headers/vec_manip.h"
 
 using namespace::std;
-
 int main()
 {
 
@@ -74,11 +73,13 @@ int main()
 		t_steps = (t2-t1)/dt + 2;
 	}
 
+	// first sk points are not used in statistics
+	int sk = 4000;
+
 	// smalles number larger than 2*t_steps that is a power of 2
-	int t_steps2 = pow2(t_steps);
+	int t_steps2 = pow2(t_steps)+sk;
 	insig.t_end=t_steps2;
 	t2 = t_steps2;
-
 	// FLN: matrix containing the FLN values. (a measure of the connection strength)
 	// etah:  a vector containing the values: 1+eta*hi
 	// v_start: starting values of the firing rates, this is updated with an Odeint routine
@@ -92,6 +93,7 @@ int main()
 		h_in >> etah[i];
 		if(etah[i] > hmax) hmax = etah[i];
 	}
+	cout << 96 << endl;
 	for(int i=0;i<etah.size();i++) etah[i] =1+eta*etah[i]/hmax;
 
 	// frates: matrix with firing rates
@@ -101,9 +103,9 @@ int main()
 	// corr_V1:  matrix with correlatoins with area V1, length is 2*t_step2 for zero padding in correl(see NR)
 	// corr_in:  matrix with correlations with input vector
 	// corr_coeff_v1: vector with the pearson correlation coefficient of each area with v1
-	vector<VecDoub> acorr(2*nareas,VecDoub(2*t_steps2,0.0));
+	vector<VecDoub> acorr(2*nareas,VecDoub(2*(t_steps2-sk),0.0));
 //	vector<VecDoub> corr_V1(2*nareas,VecDoub(2*t_steps2,0.0));
-	vector<VecDoub> corr_in(2*nareas,VecDoub(2*t_steps2,0.0));
+	vector<VecDoub> corr_in(2*nareas,VecDoub(2*(t_steps2-sk),0.0));
 	VecDoub corr_coeff_v1(2*nareas,0.0);
 
 	// empty_VecDoub: An empty NR3 vector used for initialization of some matrices
@@ -187,7 +189,6 @@ int main()
 		t += dt;	// increment start time of integration
 		ti += 1;	// increment ti
 	}
-
 /*
 	Here ends the calculation of the firing rates
 	The remaining code is the calculation of coherence,
@@ -195,31 +196,38 @@ int main()
 */
 
 
-	// copy (frates[V1e]-mean)/std in a vector with zero padding (these are used in correl)
-	// same for frates[V1i] and input_vec
-//	VecDoub temp_V1e(2*t_steps2,0.0);
-//	VecDoub temp_V1i(2*t_steps2,0.0);
-	VecDoub temp_in(2*t_steps2,0.0);
-//	double mV1e = mean(frates[0],frates[0].size());
-//	double mV1i = mean(frates[nareas],frates[nareas].size());
-	double min = mean(input_vec,input_vec.size());
-//	double sV1e = stdev(frates[0],frates[0].size());
-//	double sV1i = stdev(frates[nareas],frates[nareas].size());
-	double sin = stdev(input_vec,input_vec.size());
+//	VecDoub temp_in(2*t_steps2,0.0);
+//	double min = mean(input_vec,input_vec.size());
+//	double sin = stdev(input_vec,input_vec.size());
+//	for(int i=0;i<t_steps2;i++)
+//		temp_in[i] = (input_vec[i]-min)/sin;
 
-	for(int i=0;i<t_steps2;i++) {
-//		temp_V1e[i] = (frates[0][i]-mV1e)/sV1e;
-//		temp_V1i[i] = (frates[nareas][i]-mV1i)/sV1i;
-		temp_in[i] = (input_vec[i]-min)/sin;
-	}
+	VecDoub temp_in(2*(t_steps2-sk),0.0);
+	for(int i=0;i<(t_steps2-sk);i++)
+		temp_in[i] = input_vec[i+sk];
+	double min = mean(temp_in,t_steps2-sk);
+	double sin = stdev(temp_in,t_steps2-sk);
+	for(int i=0;i<(t_steps2-sk);i++)
+		temp_in[i] = (temp_in[i] - min)/sin;
+
 
 	// calculate the coherence and correlations
 	for(int a=0;a<2*nareas;a++){
+
 		// copy (frates[a]-mean)/std in a vector temp, with zero padding
-		VecDoub temp(2*t_steps2,0.0);
-		double ma = mean(frates[a],frates[a].size());
-		double sa = stdev(frates[a],frates[a].size());
-		for(int i=0;i<t_steps2;i++) temp[i] = (frates[a][i]-ma)/sa;
+//		VecDoub temp(2*t_steps2,0.0);
+//		double ma = mean(frates[a],frates[a].size());
+//		double sa = stdev(frates[a],frates[a].size());
+//		for(int i=0;i<t_steps2;i++) temp[i] = (frates[a][i]-ma)/sa;
+
+		VecDoub temp(2*(t_steps2-sk),0.0);
+		for(int i=0;i<(t_steps2-sk);i++)
+			temp[i] = frates[a][i+sk];
+		double ma = mean(temp,t_steps2-sk);
+		double sa = stdev(temp,t_steps2-sk);
+		for(int i=0;i<(t_steps2-sk);i++)
+			temp[i] = (temp[i] - ma)/sa;
+		
 
 		// calculate auto-correltaion
 		correl(temp,temp,acorr[a]);
@@ -231,19 +239,10 @@ int main()
 		// devide by N=0.5*size for normalization
 		devide_by(corr_in[a],corr_in[a].size(),0.5*corr_in[a].size());
 			
-		// calculate correlation between V1 and area a (excitatory area with excitatory V1)
-//		if(a<nareas) correl(temp_V1e,temp,corr_V1[a]);
-//		if(a>=nareas) correl(temp_V1i,temp,corr_V1[a]);
-
-		// devide the correlation by N=0.5*size for normalization
-//		devide_by(corr_V1[a],corr_V1[a].size(),0.5*corr_V1[a].size());
 
 		// calculate coherence between the input signal and area a
-		coh_in[a] = coherence(frates[a],input_vec,frates[a].size(),SN);
+		coh_in[a] = coherence(frates[a],input_vec,frates[a].size(),SN,frates[a].size()/2);
 
-		// calculate coherence of area a with area V1(excitatory a with excitatory V1, same for inhibitory)
-//		if(a<nareas) coh_V1[a] = coherence(frates[a],frates[0],frates[0].size(),SN);	
-//		if(a>=nareas) coh_V1[a] = coherence(frates[a],frates[nareas],frates[nareas].size(),SN);
 	}
 
 	// calculate Pearson Correlation Coefficients
@@ -262,23 +261,17 @@ int main()
 
 	ofstream acorr_out("acorr.csv");
 	acorr_out << setprecision(16);
-	write_matrix(acorr,t_steps2,2*nareas,acorr_out);	
+	write_matrix(acorr,t_steps2-sk,2*nareas,acorr_out);	
 	
 	ofstream pcc_out("pcc.csv");
 	pcc_out << setprecision(16);
 	write_matrix(corr_coeff_v1,corr_coeff_v1.size(),pcc_out);
 
-//	ofstream corr_V1_out("corr_V1.csv");
-//	corr_V1_out << setprecision(16);
-//	write_matrix(corr_V1,2*t_steps2,2*nareas,corr_V1_out);
 
 	ofstream corr_in_out("corr_in.csv");
 	corr_in_out << setprecision(16);
-	write_matrix(corr_in,2*t_steps2,2*nareas,corr_in_out);
+	write_matrix(corr_in,2*(t_steps2-sk),2*nareas,corr_in_out);
 
-//	ofstream coh_V1_out("coh_V1.csv");
-//	coh_V1_out << setprecision(16);
-//	write_matrix(coh_V1,coh_V1[0].size(),2*nareas,coh_V1_out);
 	
 	ofstream coh_in_out("coh_in.csv");
 	coh_in_out << setprecision(16);

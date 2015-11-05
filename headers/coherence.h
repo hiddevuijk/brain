@@ -44,19 +44,19 @@ namespace coh {
 
 
 template<class V>
-V coherence(const V& x, const V& y, int N, int SN, double (*filter)(int,int)=coh::hann)
+V coherence(const V& x, const V& y, int N, int SN, int skip=0,double (*filter)(int,int)=coh::hann)
 {
 	V Sxx(SN,0.0);
 	V Syy(SN,0.0);
 	V Sxy(SN,0.0);
 
-	for(int i=0;i*SN<(N-SN);i++) {
+	for(int i=0;(i*SN+skip)<(N-SN);i++) {
 		VecDoub xtemp(SN,0.0);
 		VecDoub ytemp(SN,0.0);
 	
 		for(int j=0;j<SN;j++) {
-			xtemp[j] = x[j+i*SN]*filter(j,SN);
-			ytemp[j] = y[j+i*SN]*filter(j,SN);
+			xtemp[j] = x[j+i*SN+skip]*filter(j,SN);
+			ytemp[j] = y[j+i*SN+skip]*filter(j,SN);
 		}
 
 		realft(xtemp,1);
