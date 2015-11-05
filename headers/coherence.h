@@ -38,7 +38,23 @@ namespace coh {
 		return 0.5*(1-cos(2*coh::PI*i/N));
 	}
 
+	// Barlett 
+	double barlett(int i, int N)
+	{
+		return 1 - abs( (i-0.5*N)*2./N );
+	}
 
+	// Welch
+	double welch(int i, int N)
+	{
+		return 1 - (2.*(i-0.5*N)/N)*(2.*(i-0.5*N)/N);
+	}
+
+	// Hamming
+	double hamming(int i, int N)
+	{
+		return 0.54 - 0.46*cos(2*coh::PI*i/N);
+	}
 
 }
 

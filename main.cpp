@@ -74,10 +74,10 @@ int main()
 	}
 
 	// first sk points are not used in statistics
-	int sk = 4000;
+	int sk = 4500;
 
 	// smalles number larger than 2*t_steps that is a power of 2
-	int t_steps2 = pow2(t_steps)+sk;
+	int t_steps2 = pow2(t_steps)*16+sk;
 	insig.t_end=t_steps2;
 	t2 = t_steps2;
 	// FLN: matrix containing the FLN values. (a measure of the connection strength)
@@ -93,27 +93,23 @@ int main()
 		h_in >> etah[i];
 		if(etah[i] > hmax) hmax = etah[i];
 	}
-	cout << 96 << endl;
+
 	for(int i=0;i<etah.size();i++) etah[i] =1+eta*etah[i]/hmax;
 
 	// frates: matrix with firing rates
 	vector<VecDoub> frates(2*nareas,VecDoub(t_steps2,0.0));
 
 	// acorr: a matrix containing the auto correlatoins of the firing rates of each area
-	// corr_V1:  matrix with correlatoins with area V1, length is 2*t_step2 for zero padding in correl(see NR)
 	// corr_in:  matrix with correlations with input vector
 	// corr_coeff_v1: vector with the pearson correlation coefficient of each area with v1
 	vector<VecDoub> acorr(2*nareas,VecDoub(2*(t_steps2-sk),0.0));
-//	vector<VecDoub> corr_V1(2*nareas,VecDoub(2*t_steps2,0.0));
 	vector<VecDoub> corr_in(2*nareas,VecDoub(2*(t_steps2-sk),0.0));
 	VecDoub corr_coeff_v1(2*nareas,0.0);
 
 	// empty_VecDoub: An empty NR3 vector used for initialization of some matrices
 	// coh_in: matrix with coherence w.r.t inputsignal, initialized with an empty NR3 vector
-	// coh_V1: matrix with coherence w.r.t. area V1, initialized with an empty NR3 vector
 	VecDoub empty_VecDoub;
 	vector<VecDoub> coh_in(2*nareas,empty_VecDoub);
-//	vector<VecDoub> coh_V1(2*nareas,empty_VecDoub);
 
 	// noise_vec: noise input, this is updates each integration step
 	// input_vec: if input signal is white noise, values are stored in input_noise
@@ -238,7 +234,6 @@ int main()
 		correl(temp,temp_in,corr_in[a]);
 		// devide by N=0.5*size for normalization
 		devide_by(corr_in[a],corr_in[a].size(),0.5*corr_in[a].size());
-			
 
 		// calculate coherence between the input signal and area a
 		coh_in[a] = coherence(frates[a],input_vec,frates[a].size(),SN,frates[a].size()/2);
@@ -250,8 +245,8 @@ int main()
 
 	// caculate frequencies
 	// dt is in ms so a factor 1000 to get Hz
-	VecDoub freq(SN/2,0.0);
-	for(int i=0;i<SN/2;i++) freq[i] = 1000*i/(SN*dt); 
+	VecDoub freq(SN/2+1,0.0);
+	for(int i=0;i<(SN/2+1);i++) freq[i] = 1000*i/(SN*dt); 
 
 
 	// save results
@@ -267,12 +262,10 @@ int main()
 	pcc_out << setprecision(16);
 	write_matrix(corr_coeff_v1,corr_coeff_v1.size(),pcc_out);
 
-
 	ofstream corr_in_out("corr_in.csv");
 	corr_in_out << setprecision(16);
 	write_matrix(corr_in,2*(t_steps2-sk),2*nareas,corr_in_out);
 
-	
 	ofstream coh_in_out("coh_in.csv");
 	coh_in_out << setprecision(16);
 	write_matrix(coh_in,coh_in[0].size(),2*nareas,coh_in_out);
