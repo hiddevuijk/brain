@@ -77,7 +77,7 @@ int main()
 	int sk = 4500;
 
 	// smalles number larger than 2*t_steps that is a power of 2
-	int t_steps2 = pow2(t_steps)*1+sk;
+	int t_steps2 = pow2(t_steps)*4+sk;
 	insig.t_end=t_steps2;
 	t2 = t_steps2;
 	// FLN: matrix containing the FLN values. (a measure of the connection strength)
