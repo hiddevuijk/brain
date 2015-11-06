@@ -31,8 +31,10 @@ namespace coh {
 	}
 
 
-	// hanning filter (time domain)
+	// windows (time domain)
 	// i is the time index, N is the total number of points
+
+	// hanning window
 	double hann(int i,int N)
 	{
 		return 0.5*(1-cos(2*coh::PI*i/N));
@@ -62,7 +64,7 @@ namespace coh {
 
 
 template<class V>
-V coherence(const V& x, const V& y, int N, int SN,int D, int skip=0,double (*filter)(int,int)=coh::hann)
+V coherence(const V& x, const V& y, int N, int SN,int D, int skip=0,double (*window)(int,int)=coh::hann)
 {
 	V Sxx(SN,0.0);
 	V Syy(SN,0.0);
@@ -73,8 +75,8 @@ V coherence(const V& x, const V& y, int N, int SN,int D, int skip=0,double (*fil
 		VecDoub ytemp(SN,0.0);
 	
 		for(int j=0;j<SN;j++) {
-			xtemp[j] = x[j+i*SN+skip]*filter(j,SN);
-			ytemp[j] = y[j+i*SN+skip]*filter(j,SN);
+			xtemp[j] = x[j+i*(SN-D)+skip]*filter(j,SN);
+			ytemp[j] = y[j+i*(SN-D)+skip]*filter(j,SN);
 		}
 
 		realft(xtemp,1);
