@@ -56,17 +56,19 @@ namespace coh {
 		return 0.54 - 0.46*cos(2*coh::PI*i/N);
 	}
 
+	// no_filter
+	double no_filter(int i, int N) { return 1.0;}
 }
 
 
 template<class V>
-V coherence(const V& x, const V& y, int N, int SN, int skip=0,double (*filter)(int,int)=coh::hann)
+V coherence(const V& x, const V& y, int N, int SN,int D, int skip=0,double (*filter)(int,int)=coh::hann)
 {
 	V Sxx(SN,0.0);
 	V Syy(SN,0.0);
 	V Sxy(SN,0.0);
 
-	for(int i=0;(i*SN+skip)<(N-SN);i++) {
+	for(int i=0;(i*(SN-D)+skip)<N;i++) {
 		VecDoub xtemp(SN,0.0);
 		VecDoub ytemp(SN,0.0);
 	

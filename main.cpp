@@ -77,7 +77,7 @@ int main()
 	int sk = 4500;
 
 	// smalles number larger than 2*t_steps that is a power of 2
-	int t_steps2 = pow2(t_steps)*16+sk;
+	int t_steps2 = pow2(t_steps)*1+sk;
 	insig.t_end=t_steps2;
 	t2 = t_steps2;
 	// FLN: matrix containing the FLN values. (a measure of the connection strength)
@@ -236,7 +236,8 @@ int main()
 		devide_by(corr_in[a],corr_in[a].size(),0.5*corr_in[a].size());
 
 		// calculate coherence between the input signal and area a
-		coh_in[a] = coherence(frates[a],input_vec,frates[a].size(),SN,frates[a].size()/2);
+		int D =0 ;// number of overlapping points in segments
+		coh_in[a] = coherence(frates[a],input_vec,frates[a].size(),SN,D,sk,coh::no_filter);
 
 	}
 
