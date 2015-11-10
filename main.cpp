@@ -28,6 +28,7 @@
 #include "headers/pcc.h"
 #include "headers/coherence.h"
 #include "headers/vec_manip.h"
+#include "headers/optimal_kernel.h"
 
 using namespace::std;
 int main()
@@ -74,11 +75,11 @@ int main()
 	}
 
 	// first sk points are not used in statistics
-	int sk = 4500;
+	int sk = 0;
 
 	// smalles number larger than 2*t_steps that is a power of 2
-	int t_steps2 = pow2(t_steps)*4+sk;
-	insig.t_end=t_steps2;
+	int t_steps2 = pow2(t_steps)+sk;
+//	insig.t_end=t_steps2;
 	t2 = t_steps2;
 	// FLN: matrix containing the FLN values. (a measure of the connection strength)
 	// etah:  a vector containing the values: 1+eta*hi
@@ -110,6 +111,9 @@ int main()
 	// coh_in: matrix with coherence w.r.t inputsignal, initialized with an empty NR3 vector
 	VecDoub empty_VecDoub;
 	vector<VecDoub> coh_in(2*nareas,empty_VecDoub);
+
+	//
+	vector<VecDoub> kernels(2*nareas,VecDoub(t_steps2,0.0));
 
 	// noise_vec: noise input, this is updates each integration step
 	// input_vec: if input signal is white noise, values are stored in input_noise
@@ -237,8 +241,10 @@ int main()
 
 		// calculate coherence between the input signal and area a
 		int D =0 ;// number of overlapping points in segments
-		coh_in[a] = coherence(frates[a],input_vec,frates[a].size(),SN,D,sk,coh::no_filter);
+		coh_in[a] = coherence(frates[a],input_vec,frates[a].size(),SN,D,sk,coh::barlett);
 
+		optimal_kernel(input_vec,frates[a],kernels[a],frates.size());
+	
 	}
 
 	// calculate Pearson Correlation Coefficients
@@ -274,6 +280,10 @@ int main()
 	ofstream f_out("f.csv");
 	f_out << setprecision(16);
 	write_matrix(freq,freq.size(),f_out);
+
+	ofstream kernels_out("kernels.csv");
+	kernels_out << setprecision(16);
+	write_matrix(kernels,kernels[0].size(),2*nareas,kernels_out);
 
 	return 0;
 }
