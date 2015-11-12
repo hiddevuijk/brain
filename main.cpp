@@ -75,11 +75,11 @@ int main()
 	}
 
 	// first sk points are not used in statistics
-	int sk = 0;
+	int sk = 4000;
 
 	// smalles number larger than 2*t_steps that is a power of 2
-	int t_steps2 = pow2(t_steps)+sk;
-//	insig.t_end=t_steps2;
+	int t_steps2 = pow2(t_steps)*4+sk;
+	insig.t_end=t_steps2;
 	t2 = t_steps2;
 	// FLN: matrix containing the FLN values. (a measure of the connection strength)
 	// etah:  a vector containing the values: 1+eta*hi
@@ -190,7 +190,7 @@ int main()
 		ti += 1;	// increment ti
 	}
 /*
-	Here ends the calculation of the firing rates
+	This is the end of calculation of the firing rates
 	The remaining code is the calculation of coherence,
 	correlation and auto-correlation.
 */
@@ -243,7 +243,7 @@ int main()
 		int D =0 ;// number of overlapping points in segments
 		coh_in[a] = coherence(frates[a],input_vec,frates[a].size(),SN,D,sk,coh::barlett);
 
-		optimal_kernel(input_vec,frates[a],kernels[a],frates.size());
+//		optimal_kernel(input_vec,frates[a],kernels[a],frates.size());
 	
 	}
 
@@ -281,9 +281,9 @@ int main()
 	f_out << setprecision(16);
 	write_matrix(freq,freq.size(),f_out);
 
-	ofstream kernels_out("kernels.csv");
-	kernels_out << setprecision(16);
-	write_matrix(kernels,kernels[0].size(),2*nareas,kernels_out);
+//	ofstream kernels_out("kernels.csv");
+//	kernels_out << setprecision(16);
+//	write_matrix(kernels,kernels[0].size(),2*nareas,kernels_out);
 
 	return 0;
 }
