@@ -81,8 +81,10 @@ int main()
 	int t_steps2 = pow2(t_steps)*4+sk;
 	insig.t_end=t_steps2;
 	t2 = t_steps2;
+
+
 	// FLN: matrix containing the FLN values. (a measure of the connection strength)
-	// etah:  a vector containing the values: 1+eta*hi
+	// etah:  a vector containing the values: etah[i] = 1+eta*h[i]
 	// v_start: starting values of the firing rates, this is updated with an Odeint routine
 	MatDoub FLN(nareas,nareas,0.0);
 	VecDoub etah(nareas,1.0);
